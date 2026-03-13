@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpsR Milestone 1 控制台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>OpsR · Milestone 1 嗅探控制台</h1>
+      <p>支持指定 IP / 网段嗅探（多线程），资产打标，列表分类与可视化拓扑切换（无登录）</p>
+    </header>
+
+    <main class="page">
+      <section class="card control">
+        <h2>嗅探任务</h2>
+        <div class="grid2">
+          <label>目标（逗号分隔，支持 IP 和 CIDR）
+            <input id="targetsInput" value="10.0.0.10,10.0.1.0/30" />
+          </label>
+          <label>线程数
+            <input id="workersInput" type="number" min="1" max="64" value="8" />
+          </label>
+        </div>
+        <div class="actions">
+          <button id="scanBtn">开始嗅探</button>
+          <button id="sampleBtn" class="secondary">加载示例</button>
+        </div>
+        <p id="scanMsg" class="hint"></p>
+      </section>
+
+      <section class="card control">
+        <h2>资产打标</h2>
+        <div class="grid3">
+          <label>资产 ID
+            <input id="tagAssetId" placeholder="输入资产ID" />
+          </label>
+          <label>标签 Key
+            <input id="tagKey" placeholder="如 env" />
+          </label>
+          <label>标签 Value
+            <input id="tagValue" placeholder="如 prod" />
+          </label>
+        </div>
+        <button id="tagBtn">应用标签</button>
+        <p id="tagMsg" class="hint"></p>
+      </section>
+
+      <section class="card full">
+        <div class="toolbar">
+          <h2>资产视图</h2>
+          <div class="view-actions">
+            <select id="categoryFilter">
+              <option value="all">全部分类</option>
+              <option value="database">database</option>
+              <option value="middleware">middleware</option>
+              <option value="server">server</option>
+            </select>
+            <button id="listViewBtn" class="tab active">列表分类</button>
+            <button id="topologyViewBtn" class="tab">可视化拓扑</button>
+          </div>
+        </div>
+
+        <div id="listView">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>IP</th>
+                <th>分类</th>
+                <th>服务</th>
+                <th>标签</th>
+              </tr>
+            </thead>
+            <tbody id="assetTable"></tbody>
+          </table>
+        </div>
+
+        <div id="topologyView" class="hidden">
+          <svg id="topologySvg" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
