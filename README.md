@@ -119,3 +119,35 @@ OpsR 是一个面向企业的基础环境运维工具，基于多 Agent 协同�
 - 先以 **“发现 + 安装 + 监控 + 告警”** 为最小闭环。
 - 将高频故障场景沉淀为 Runbook，逐步引入“审批后自动修复”。
 - 建立知识库与操作审计，为后续智能化优化提供数据基础。
+ 
+## 9. 里程碑 1 当前开发进展
+
+当前仓库已开始里程碑 1 的核心领域开发，提供一个可扩展的 Python 服务层（内存版）用于验证“发现 + 资产管理 + 基础拓扑”闭环：
+
+- `src/opsr/models/asset.py`：定义探测信号、资产模型、拓扑边、拓扑快照。
+- `src/opsr/agents/discovery_agent.py`：Discovery Agent 根据端口与进程信号执行资产识别与分类（database/middleware/server），并构建依赖边。
+- `src/opsr/repositories/asset_repository.py`：资产内存仓库，支持 upsert、查询、标签更新。
+- `src/opsr/services/asset_inventory_service.py`：里程碑 1 编排服务，封装发现流程、资产列表、资产打标、拓扑输出。
+- `tests/test_milestone1.py`：覆盖资产分类、标签持久化、拓扑依赖关系测试。
+
+### 快速验证
+
+```bash
+python -m unittest discover -s tests -p "test_*.py"
+```
+
+
+### 9.1 里程碑 1 前端页面（Demo）
+
+- 新增 `frontend/index.html`，提供无登录的 Milestone 1 控制台页面。
+- 页面支持：指定 IP / CIDR 网段嗅探（可配置线程数）、资产列表打标。
+- 支持单页切换“列表分类展示 / 可视化拓扑展示”，并可按分类筛选资产。
+- 该页面当前基于前端内置逻辑模拟调用后端能力，用于快速验证交互流程。
+
+本地运行：
+
+```bash
+python -m http.server 8080
+# 浏览器访问 http://localhost:8080/frontend/
+```
+ 
