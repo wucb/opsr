@@ -1,87 +1,444 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OpsR Milestone 1 控制台</title>
+    <title>OpsR AI Native Platform</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <h1>OpsR · Milestone 1 嗅探控制台</h1>
-      <p>支持指定 IP / 网段嗅探（多线程），资产打标，列表分类与可视化拓扑切换（无登录）</p>
-    </header>
-
-    <main class="page">
-      <section class="card control">
-        <h2>嗅探任务</h2>
-        <div class="grid2">
-          <label>目标（逗号分隔，支持 IP 和 CIDR）
-            <input id="targetsInput" value="10.0.0.10,10.0.1.0/30" />
-          </label>
-          <label>线程数
-            <input id="workersInput" type="number" min="1" max="64" value="8" />
-          </label>
+    <div class="backdrop"></div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">OpsR</span>
+          <span class="brand-sub">AI Native Ops</span>
         </div>
-        <div class="actions">
-          <button id="scanBtn">开始嗅探</button>
-          <button id="sampleBtn" class="secondary">加载示例</button>
+        <nav class="nav">
+          <button class="nav-item active" data-view="home">控制塔</button>
+          <button class="nav-item" data-view="assets">资产宇宙</button>
+          <button class="nav-item" data-view="services">服务工厂</button>
+          <button class="nav-item" data-view="incidents">事件中心</button>
+          <button class="nav-item" data-view="assistant">AI Ops Studio</button>
+          <button class="nav-item" data-view="compliance">合规与巡检</button>
+        </nav>
+        <div class="api-box">
+          <label>API Base</label>
+          <input id="apiBaseInput" value="http://localhost:8000" />
+          <button id="saveApiBtn" class="secondary">保存</button>
         </div>
-        <p id="scanMsg" class="hint"></p>
-      </section>
+      </aside>
 
-      <section class="card control">
-        <h2>资产打标</h2>
-        <div class="grid3">
-          <label>资产 ID
-            <input id="tagAssetId" placeholder="输入资产ID" />
-          </label>
-          <label>标签 Key
-            <input id="tagKey" placeholder="如 env" />
-          </label>
-          <label>标签 Value
-            <input id="tagValue" placeholder="如 prod" />
-          </label>
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Platform v0.4 Demo</p>
+            <h1>AI 原生运维平台</h1>
+            <p class="subtitle">从发现、编排、监控到复盘的闭环工作台。</p>
+          </div>
+          <div class="stat-grid">
+            <div class="stat">
+              <span>资产总量</span>
+              <strong id="statAssets">0</strong>
+            </div>
+            <div class="stat">
+              <span>在线服务</span>
+              <strong id="statServices">0</strong>
+            </div>
+            <div class="stat">
+              <span>活跃告警</span>
+              <strong id="statAlerts">0</strong>
+            </div>
+            <div class="stat">
+              <span>自动化节省</span>
+              <strong id="statSavings">0h</strong>
+            </div>
+          </div>
+        </header>
+
+        <section class="view active" id="view-home">
+          <div class="dashboard">
+            <div class="card ai-oracle">
+              <div class="ai-header">
+                <div>
+                  <h2>AI Ops 大脑</h2>
+                  <p class="muted">即时理解上下文，生成策略与执行方案。</p>
+                </div>
+                <div class="filter-chip">AI Native</div>
+              </div>
+              <div class="ai-input">
+                <input id="aiCommandInput" placeholder="例如：找出当前最高风险链路并生成执行计划" />
+                <button id="aiCommandBtn">执行</button>
+              </div>
+              <div class="ai-cards" id="aiSignalGrid"></div>
+            </div>
+            <div class="card dashboard-hero">
+              <div class="hero-header">
+                <div>
+                  <h2>运维仪表盘</h2>
+                  <p class="muted">统一视角掌控资产、服务、告警与执行。</p>
+                </div>
+                <div class="hero-actions">
+                  <button id="runTriageBtn">一键态势归因</button>
+                  <button class="secondary" id="openOpsStudio">打开 Ops Studio</button>
+                </div>
+              </div>
+              <div class="kpi-grid">
+                <div class="kpi-card">
+                  <span>在线服务</span>
+                  <strong id="kpiServices">0</strong>
+                  <div class="kpi-trend">↑ 2.1% 本周</div>
+                </div>
+                <div class="kpi-card">
+                  <span>高优告警</span>
+                  <strong id="kpiCritical">0</strong>
+                  <div class="kpi-trend warn">↓ 18% 降噪</div>
+                </div>
+                <div class="kpi-card">
+                  <span>自动化执行</span>
+                  <strong id="kpiRuns">0</strong>
+                  <div class="kpi-trend">↑ 6 任务</div>
+                </div>
+                <div class="kpi-card">
+                  <span>合规健康度</span>
+                  <strong id="kpiCompliance">0%</strong>
+                  <div class="kpi-trend">↑ 4% 本周</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card dashboard-wide">
+              <div class="section-head">
+                <div>
+                  <h2>系统健康趋势</h2>
+                  <p class="muted">CPU / 内存 / 告警强度的 24h 走势。</p>
+                </div>
+                <div class="filter-chip">24h</div>
+              </div>
+              <div class="chart-grid" id="trendCharts"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>实时健康脉搏</h2>
+                  <p class="muted">核心集群健康指标。</p>
+                </div>
+              </div>
+              <div class="pulse-grid" id="pulseGrid"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>自动化链路</h2>
+                  <p class="muted">发现 → 编排 → 监控 → 处置 → 复盘。</p>
+                </div>
+                <div class="filter-chip">Ops Chain</div>
+              </div>
+              <div class="chain" id="opsChain"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>关键任务流</h2>
+                  <p class="muted">安装、巡检、告警处置的当前进度。</p>
+                </div>
+              </div>
+              <div class="timeline" id="taskTimeline"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>最新告警</h2>
+                  <p class="muted">从噪音中提炼的高优先级事件。</p>
+                </div>
+              </div>
+              <div class="list" id="homeAlerts"></div>
+            </div>
+
+            <div class="card">
+              <div class="section-head">
+                <div>
+                  <h2>策略与建议</h2>
+                  <p class="muted">AI 汇总可执行的优先项。</p>
+                </div>
+              </div>
+              <div class="hero-strip" id="heroStrip"></div>
+            </div>
+
+            <div class="card dashboard-wide">
+              <div class="section-head">
+                <div>
+                  <h2>行动决策流</h2>
+                  <p class="muted">AI 自动将信号转换为计划、审批、执行。</p>
+                </div>
+                <div class="filter-chip">AI Flow</div>
+              </div>
+              <div class="decision-flow" id="decisionFlow"></div>
+            </div>
+            <div class="card dashboard-wide">
+              <div class="section-head">
+                <div>
+                  <h2>AI 情景编排</h2>
+                  <p class="muted">一次指令生成多条执行流，并展示依赖关系。</p>
+                </div>
+                <div class="filter-chip">Scenario</div>
+              </div>
+              <div class="scenario-grid">
+                <div class="scenario-graph" id="scenarioGraph"></div>
+                <div class="scenario-steps">
+                  <div class="scenario-detail" id="scenarioDetail"></div>
+                  <div class="scenario-step-list" id="scenarioSteps"></div>
+                  <div class="scenario-history" id="scenarioHistory"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-assets">
+          <div class="card compact">
+            <h2>环境发现</h2>
+            <div class="grid2">
+              <label>目标（逗号分隔，支持 IP / CIDR）
+                <input id="targetsInput" value="10.0.0.10,10.0.1.0/30" />
+              </label>
+              <label>并发线程数
+                <input id="workersInput" type="number" min="1" max="64" value="8" />
+              </label>
+            </div>
+            <div class="actions">
+              <button id="scanBtn">开始探测</button>
+              <button id="sampleBtn" class="secondary">加载示例</button>
+            </div>
+            <p id="scanMsg" class="hint"></p>
+          </div>
+
+          <div class="card large">
+            <div class="toolbar">
+              <div>
+                <h2>资产视图</h2>
+                <p class="muted">列表/拓扑切换，支持 AI 自动打标。</p>
+              </div>
+              <div class="view-actions">
+                <select id="categoryFilter">
+                  <option value="all">全部分类</option>
+                  <option value="database">database</option>
+                  <option value="middleware">middleware</option>
+                  <option value="server">server</option>
+                </select>
+                <button id="autoTagBtn" class="secondary">AI 自动打标</button>
+                <button id="listViewBtn" class="tab active">列表</button>
+                <button id="topologyViewBtn" class="tab">拓扑</button>
+              </div>
+            </div>
+            <div class="summary-row" id="assetSummary"></div>
+            <div id="listView">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>IP</th>
+                    <th>分类</th>
+                    <th>服务</th>
+                    <th>标签</th>
+                    <th>打标</th>
+                  </tr>
+                </thead>
+                <tbody id="assetTable"></tbody>
+              </table>
+            </div>
+            <div id="topologyView" class="hidden">
+              <svg id="topologySvg" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-services">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>服务工厂</h2>
+                <p class="muted">服务安装、资源状态、依赖拓扑与进度。</p>
+              </div>
+              <div class="actions">
+                <button class="secondary" id="serviceRefreshBtn">刷新数据</button>
+                <button id="addServiceBtn">添加服务</button>
+              </div>
+            </div>
+            <div class="service-toolbar">
+              <div class="service-filters">
+                <input id="serviceSearchInput" placeholder="搜索服务 / IP / 标签" />
+                <select id="serviceStatusFilter">
+                  <option value="all">全部状态</option>
+                  <option value="running">运行中</option>
+                  <option value="degraded">异常</option>
+                  <option value="stopped">已停止</option>
+                </select>
+                <select id="serviceGroupFilter">
+                  <option value="all">全部分组</option>
+                  <option value="database">数据库</option>
+                  <option value="middleware">中间件</option>
+                  <option value="core">核心服务</option>
+                </select>
+              </div>
+            </div>
+            <div class="summary-row" id="serviceSummary"></div>
+            <div class="service-grid" id="serviceGrid"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-service-detail">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2 id="detailTitle">服务详情</h2>
+                <p class="muted" id="detailMeta">依赖拓扑与监控洞察</p>
+              </div>
+              <div class="actions">
+                <button class="secondary" id="backToServicesBtn">返回服务工厂</button>
+              </div>
+            </div>
+            <div class="detail-header">
+              <div>
+                <h3 id="serviceTitle">-</h3>
+                <p class="muted" id="serviceMeta">-</p>
+              </div>
+              <div class="detail-stats">
+                <div>
+                  <span>CPU</span>
+                  <strong id="serviceCpu">-</strong>
+                </div>
+                <div>
+                  <span>内存</span>
+                  <strong id="serviceMemory">-</strong>
+                </div>
+                <div>
+                  <span>状态</span>
+                  <strong id="serviceStatus">-</strong>
+                </div>
+              </div>
+            </div>
+            <div class="detail-body">
+              <div>
+                <h3>依赖拓扑</h3>
+                <div class="mini-topology" id="dependencyGraph"></div>
+              </div>
+              <div>
+                <h3>安装进度</h3>
+                <div class="progress-list" id="installProgress"></div>
+              </div>
+            </div>
+            <div class="detail-body">
+              <div>
+                <h3>实时监控</h3>
+                <div class="monitor-grid" id="serviceMonitor"></div>
+              </div>
+              <div>
+                <h3>近 1 小时趋势</h3>
+                <div class="monitor-chart" id="serviceTrend"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="view-incidents">
+          <div class="card">
+            <h2>事件中心</h2>
+            <p class="muted">高优先级告警与行动建议。</p>
+            <div class="list" id="incidentList"></div>
+            <div class="section-head" style="margin-top: 20px;">
+              <div>
+                <h3>推荐 Runbook</h3>
+                <p class="muted">AI 结合当前上下文生成的处置计划。</p>
+              </div>
+            </div>
+            <div class="list" id="incidentPlaybooks"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-assistant">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>AI Ops Studio</h2>
+                <p class="muted">输入自然语言需求，生成策略与执行。</p>
+              </div>
+              <div class="filter-chip">Milestone 2.4</div>
+            </div>
+            <label>请求文本
+              <textarea id="assistantInput" rows="3" placeholder="例如：分析 redis 延迟并执行修复"></textarea>
+            </label>
+            <div class="actions">
+              <button id="assistantBtn">生成建议</button>
+            </div>
+            <p id="assistantMsg" class="hint"></p>
+            <div id="assistantSuggestions" class="list"></div>
+            <div class="section-head" style="margin-top: 20px;">
+              <div>
+                <h3>Runbook 库</h3>
+                <p class="muted">可直接执行的标准化流程。</p>
+              </div>
+            </div>
+            <div id="runbookList" class="list"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-compliance">
+          <div class="card">
+            <div class="section-head">
+              <div>
+                <h2>合规与巡检</h2>
+                <p class="muted">基线检查、漂移检测与报告。</p>
+              </div>
+              <div class="filter-chip">Milestone 2.5</div>
+            </div>
+            <div class="grid2">
+              <label>基线观察值 (JSON)
+                <textarea id="baselineInput" rows="3" placeholder='{"ssh_enabled":true,"backup_enabled":false,"patch_level":"0.9.0"}'></textarea>
+              </label>
+              <label>漂移检测 (JSON)
+                <textarea id="driftInput" rows="3" placeholder='{"resource_id":"host-1","desired":{"ntp":true},"current":{"ntp":false}}'></textarea>
+              </label>
+            </div>
+            <div class="actions">
+              <button id="runBaselineBtn">运行基线检查</button>
+              <button id="runDriftBtn" class="secondary">运行漂移检测</button>
+              <button id="refreshReportBtn" class="secondary">刷新报告</button>
+            </div>
+            <p id="complianceMsg" class="hint"></p>
+            <div id="complianceList" class="list"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal" id="serviceModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>添加服务</h2>
+          <button id="closeServiceModal" class="secondary">关闭</button>
         </div>
-        <button id="tagBtn">应用标签</button>
-        <p id="tagMsg" class="hint"></p>
-      </section>
-
-      <section class="card full">
-        <div class="toolbar">
-          <h2>资产视图</h2>
-          <div class="view-actions">
-            <select id="categoryFilter">
-              <option value="all">全部分类</option>
-              <option value="database">database</option>
-              <option value="middleware">middleware</option>
-              <option value="server">server</option>
-            </select>
-            <button id="listViewBtn" class="tab active">列表分类</button>
-            <button id="topologyViewBtn" class="tab">可视化拓扑</button>
+        <div class="modal-body">
+          <div class="modal-chat" id="serviceChat">
+            <div class="chat-bubble">我可以帮你安装 Redis/MySQL/Postgres。请描述需求。</div>
+          </div>
+          <div class="modal-input">
+            <input id="servicePrompt" placeholder="例如：在 10.0.0.12 安装 Redis 7 并设置 /data/redis" />
+            <button id="executeInstallBtn">执行</button>
           </div>
         </div>
-
-        <div id="listView">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>IP</th>
-                <th>分类</th>
-                <th>服务</th>
-                <th>标签</th>
-              </tr>
-            </thead>
-            <tbody id="assetTable"></tbody>
-          </table>
+        <div class="modal-footer">
+          <h3>依赖拓扑</h3>
+          <div class="mini-topology" id="modalTopology"></div>
+          <h3>安装进度</h3>
+          <div class="progress-list" id="modalProgress"></div>
         </div>
-
-        <div id="topologyView" class="hidden">
-          <svg id="topologySvg" viewBox="0 0 1000 440" preserveAspectRatio="xMidYMid meet"></svg>
-        </div>
-      </section>
-    </main>
+      </div>
+    </div>
 
     <script src="./app.js"></script>
   </body>
